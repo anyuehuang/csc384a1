@@ -144,14 +144,14 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
   goal = False
   # the stop time and curr time
   curr = os.times()[0]
-  stop_time = curr + timebound - 0.2
+  stop_time = curr + timebound 
   #initial the search engine
   wrapped_fval_function = (lambda sN: fval_function(sN, weight))
   se = SearchEngine('custom', 'full')
   se.init_search(initial_state, snowman_goal_state, heur_fn, wrapped_fval_function)
   costbound = (float('inf'), float('inf'), float('inf'))   #Since we only continue if g+h < current cost of goal state
 
-  result = se.search(timebound-0.2)
+  result = se.search(timebound)
 
   while curr < stop_time:
           # return the last goal if the iterative search call return false.
