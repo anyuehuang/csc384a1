@@ -59,7 +59,6 @@ def heur_alternate(state):
     #Write a heuristic function that improves upon heur_manhattan_distance to estimate distance between the current state and the goal.
     #Your function should return a numeric value for the estimate of the distance to the goal.
 
-    inf = float('inf')
     toal = 0   #total heur value
     goal = state.destination
     robot = state.robot
@@ -73,19 +72,19 @@ def heur_alternate(state):
       # one of the snowball is in the corner of the board
       if ((x == 0 and y == 0) or (x == state.width - 1 and y == state.height - 1) or (x == 0 and y == state.height - 1) or (y == 0 and x == state.width - 1)):
             if (goal != snow):
-              return inf
+              return float('inf')
 
               #if in corner with size 1, 2, 4, 5 then cannot move
             elif (state.snowballs[snow] == 2 or state.snowballs[snow] == 1 or state.snowballs[snow] == 4 or state.snowballs[snow] == 5) and (snow == goal):
-              return inf
+              return float('inf')
       
       # one of the snowball is next to the side board while the destination is not on that side
       if ((x == 0 or x == state.width - 1) and (x != goal[0])) or ((y == 0 or y == state.height - 1) and (y != goal[1])):
-            return inf
+            return float('inf')
 
       # there is two obstacles next to the snowball while it is not the destination
       if ((((x+1, y) in obs) and ((x, y+1) in obs)) or (((x+1, y) in obs) and ((x, y-1) in obs)) or (((x, y+1) in obs) and ((x-1, y) in obs)) or (((x, y-1) in obs) and ((x-1, y) in obs))) and (snow != goal):
-            return inf
+            return float('inf')
       
       if ((x+1,y) in obs and goal[0] < x) or ((x-1,y) in obs and goal[0] > x):
             toal += 3
