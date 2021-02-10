@@ -150,7 +150,7 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
   '''implementation of weighted astar algorithm'''
   goal = False
   # the stop time and curr time
-  curr = os.times()[4]
+  curr = os.times()[0]
   stop_time = curr + timebound - 0.2
   #initial the search engine
   wrapped_fval_function = (lambda sN: fval_function(sN, weight))
@@ -166,7 +166,7 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
         if result == False:
               return goal
 
-        curr = os.times()[4]
+        curr = os.times()[0]
         
         timebound = stop_time - curr
         if result.gval < costbound[2]:
@@ -187,8 +187,8 @@ def anytime_gbfs(initial_state, heur_fn, timebound = 5):
   goal = None
 
   # the stop time and curr time
-  curr = os.times()[4]
-  stop_time = os.times()[4] + timebound - 0.2
+  curr = os.times()[0]
+  stop_time = curr + timebound - 0.2
 
   #initial the search engine
   se = SearchEngine('best_first', 'full')
@@ -205,7 +205,7 @@ def anytime_gbfs(initial_state, heur_fn, timebound = 5):
         if result == False:
               return goal
 
-        curr = os.times()[4] 
+        curr = os.times()[0] 
         new_timebound = stop_time - curr
         if result.gval < costbound[0]:
               costbound = (result.gval, float('inf'), float('inf'))  # Set g+h and h value to inf so that we only compare the g value
