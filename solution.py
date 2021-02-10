@@ -80,14 +80,7 @@ def heur_alternate(state):
               return inf
       
       # one of the snowball is next to the side board while the destination is not on that side
-      if ((x == 0 or x == state.width - 1)):
-            if (x != goal[0]):
-                  return inf
-            elif (x,y) != goal and (state.snowballs[snow] == 3 or state.snowballs[snow] == 4 or state.snowballs[snow] == 5 or state.snowballs[snow] == 6):
-                  return inf
-
-            
-      elif ((y == 0 or y == state.height - 1) and (y != goal[1])):
+      if ((x == 0 or x == state.width - 1) and (x != goal[0])) or ((y == 0 or y == state.height - 1) and (y != goal[1])):
             return inf
 
       # there is two obstacles next to the snowball while it is not the destination
@@ -95,7 +88,7 @@ def heur_alternate(state):
             return inf
       
       if ((x+1,y) in obs and goal[0] < x) or ((x-1,y) in obs and goal[0] > x):
-                toal += 3
+            toal += 3
       if ((x,y+1) in obs and goal[1] < y) or ((x,y-1) in obs and goal[1] > y):
             toal += 3
 
