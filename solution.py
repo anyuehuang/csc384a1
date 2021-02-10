@@ -69,9 +69,6 @@ def heur_alternate(state):
       x = snow[0]
       y = snow[1]
       robot_to_snow.append(abs(x - robot[0]) + abs(y - robot[1]))
-      # if there is already a final snowman in the destination
-      if (state.snowballs[snow] == 6) and (snow == goal):
-            return 0
 
       # one of the snowball is in the corner of the board
       if ((x == 0 and y == 0) or (x == state.width - 1 and y == state.height - 1) or (x == 0 and y == state.height - 1) or (y == 0 and x == state.width - 1)):
@@ -79,12 +76,17 @@ def heur_alternate(state):
               return inf
 
               #if in corner with size 1, 2, 4, 5 then cannot move
-            if (state.snowballs[snow] == 2 or state.snowballs[snow] == 1 or state.snowballs[snow] == 4 or state.snowballs[snow] == 5) and (snow == goal):
+            elif (state.snowballs[snow] == 2 or state.snowballs[snow] == 1 or state.snowballs[snow] == 4 or state.snowballs[snow] == 5) and (snow == goal):
               return inf
       
       # one of the snowball is next to the side board while the destination is not on that side
-      if ((x == 0 or x == state.width - 1) and (x != goal[0])):
-            return inf
+      if ((x == 0 or x == state.width - 1)):
+            if (x != goal[0]):
+                  return inf
+            elif (x,y) != goal and (state.snowballs[snow] == 3 or state.snowballs[snow] == 4 or state.snowballs[snow] == 5 or state.snowballs[snow] == 6):
+                  return inf
+
+            
       elif ((y == 0 or y == state.height - 1) and (y != goal[1])):
             return inf
 
@@ -92,20 +94,25 @@ def heur_alternate(state):
       if ((((x+1, y) in obs) and ((x, y+1) in obs)) or (((x+1, y) in obs) and ((x, y-1) in obs)) or (((x, y+1) in obs) and ((x-1, y) in obs)) or (((x, y-1) in obs) and ((x-1, y) in obs))) and (snow != goal):
             return inf
       
+      if ((x+1,y) in obs and goal[0] < x) or ((x-1,y) in obs and goal[0] > x):
+                toal += 3
+      if ((x,y+1) in obs and goal[1] < y) or ((x,y-1) in obs and goal[1] > y):
+            toal += 3
 
-      stack = state.snowballs[snow]
-      distance = abs(x - goal[0]) + abs(y - goal[1])
+      if snow != goal:
+            stack = state.snowballs[snow]
+            distance = abs(x - goal[0]) + abs(y - goal[1])
 
-      # check if there is a two snowball stack
-      if  (stack == 3) or (stack == 4) or (stack == 5):
-            distance *= 2
+            # check if there is a two snowball stack
+            if  (stack == 3) or (stack == 4) or (stack == 5):
+                  distance *= 2
 
-      # check if there is a three snowball stack
-      elif (stack == 6):
-            distance *= 3
+            # check if there is a three snowball stack
+            elif (stack == 6):
+                  distance *= 3
 
-      # add manhatten distance to total
-      toal += distance
+            # add manhatten distance to total
+            toal += distance
     
     toal += min(robot_to_snow)
     return toal
@@ -144,14 +151,14 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
   goal = False
   # the stop time and curr time
   curr = os.times()[4]
-  stop_time = curr + timebound
+  stop_time = curr + timebound - 0.2
   #initial the search engine
   wrapped_fval_function = (lambda sN: fval_function(sN, weight))
   se = SearchEngine('custom', 'full')
   se.init_search(initial_state, snowman_goal_state, heur_fn, wrapped_fval_function)
   costbound = (float('inf'), float('inf'), float('inf'))   #Since we only continue if g+h < current cost of goal state
 
-  result = se.search(timebound)
+  result = se.search(timebound-0.2)
 
   while curr < stop_time:
           # return the last goal if the iterative search call return false.
@@ -181,13 +188,13 @@ def anytime_gbfs(initial_state, heur_fn, timebound = 5):
 
   # the stop time and curr time
   curr = os.times()[4]
-  stop_time = os.times()[4] + timebound
+  stop_time = os.times()[4] + timebound - 0.2
 
   #initial the search engine
   se = SearchEngine('best_first', 'full')
   se.init_search(initState=initial_state, goal_fn=snowman_goal_state, heur_fn=heur_fn)
   costbound = (float('inf'), float('inf'), float('inf'))   #Since we only continue if g < current cost of goal state
-  result = se.search(timebound)
+  result = se.search(timebound-0.2)
   
   #return False if the first time we call search returns false
   if result == False:
