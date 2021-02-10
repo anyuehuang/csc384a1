@@ -64,17 +64,23 @@ def heur_alternate(state):
     goal = state.destination
     robot = state.robot
     obs = state.obstacles
+    robot_to_snow = []
     for snow in state.snowballs:
       x = snow[0]
       y = snow[1]
-
+      robot_to_snow.append(abs(x - robot[0]) + abs(y - robot[1]))
       # if there is already a final snowman in the destination
       if (state.snowballs[snow] == 6) and (snow == goal):
             return 0
 
       # one of the snowball is in the corner of the board
       if ((x == 0 and y == 0) or (x == state.width - 1 and y == state.height - 1) or (x == 0 and y == state.height - 1) or (y == 0 and x == state.width - 1)):
-            return inf
+            if (goal != snow):
+              return inf
+
+              #if in corner with size 1, 2, 4, 5 then cannot move
+            if (state.snowballs[snow] == 2 or state.snowballs[snow] == 1 or state.snowballs[snow] == 4 or state.snowballs[snow] == 5) and (snow == goal):
+              return inf
       
       # one of the snowball is next to the side board while the destination is not on that side
       if ((x == 0 or x == state.width - 1) and (x != goal[0])):
@@ -85,14 +91,10 @@ def heur_alternate(state):
       # there is two obstacles next to the snowball while it is not the destination
       if ((((x+1, y) in obs) and ((x, y+1) in obs)) or (((x+1, y) in obs) and ((x, y-1) in obs)) or (((x, y+1) in obs) and ((x-1, y) in obs)) or (((x, y-1) in obs) and ((x-1, y) in obs))) and (snow != goal):
             return inf
-
+      
 
       stack = state.snowballs[snow]
       distance = abs(x - goal[0]) + abs(y - goal[1])
-      # robot_distance = abs(robot[0] - goal[0]) + abs(robot[1] - goal[1])
-
-      # add robot distance to toal
-      # toal += robot_distance
 
       # check if there is a two snowball stack
       if  (stack == 3) or (stack == 4) or (stack == 5):
@@ -104,6 +106,8 @@ def heur_alternate(state):
 
       # add manhatten distance to total
       toal += distance
+    
+    toal += min(robot_to_snow)
     return toal
 
 
@@ -140,14 +144,14 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
   goal = False
   # the stop time and curr time
   curr = os.times()[4]
-  stop_time = curr + timebound - 1
+  stop_time = curr + timebound - 0.2
   #initial the search engine
   wrapped_fval_function = (lambda sN: fval_function(sN, weight))
   se = SearchEngine('custom', 'full')
   se.init_search(initial_state, snowman_goal_state, heur_fn, wrapped_fval_function)
   costbound = (float('inf'), float('inf'), float('inf'))   #Since we only continue if g+h < current cost of goal state
 
-  result = se.search(timebound)
+  result = se.search(timebound-0.2)
 
   while curr < stop_time:
           # return the last goal if the iterative search call return false.
@@ -155,8 +159,9 @@ def anytime_weighted_astar(initial_state, heur_fn, weight=1., timebound = 5):
         if result == False:
               return goal
 
-        timebound = timebound - (os.times()[4] - curr)
         curr = os.times()[4]
+        
+        timebound = stop_time - curr
         if result.gval < costbound[2]:
               costbound = (float('inf'), float('inf'), result.gval)  # Set g and h value to inf so that we only compare the f value
               goal = result
@@ -176,13 +181,13 @@ def anytime_gbfs(initial_state, heur_fn, timebound = 5):
 
   # the stop time and curr time
   curr = os.times()[4]
-  stop_time = os.times()[4] + timebound - 1
+  stop_time = os.times()[4] + timebound - 0.2
 
   #initial the search engine
   se = SearchEngine('best_first', 'full')
   se.init_search(initState=initial_state, goal_fn=snowman_goal_state, heur_fn=heur_fn)
   costbound = (float('inf'), float('inf'), float('inf'))   #Since we only continue if g < current cost of goal state
-  result = se.search(timebound)
+  result = se.search(timebound-0.2)
   
   #return False if the first time we call search returns false
   if result == False:
